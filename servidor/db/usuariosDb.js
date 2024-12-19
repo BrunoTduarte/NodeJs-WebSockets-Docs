@@ -1,3 +1,4 @@
+import { criarHashSalSenha } from "../utils/criarHashSalSenha.js";
 import { usuariosColecao } from "./dbConnect.js";
 
 function encontrarUsuario(nome) {
@@ -5,7 +6,9 @@ function encontrarUsuario(nome) {
 }
 
 function cadastrarUsuario( {nome, senha} ){
-    return usuariosColecao.insertOne({nome, senha})
+    const { hashSenha, salSenha } = criarHashSalSenha(senha);
+
+    return usuariosColecao.insertOne({nome, hashSenha, salSenha})
 };
 
 export {cadastrarUsuario, encontrarUsuario };
