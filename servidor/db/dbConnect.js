@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 
 const cliente = new MongoClient(
-  "mongodb+srv://btomeduarte:123321@nodejs-websockets.3wjh7.mongodb.net/?retryWrites=true&w=majority&appName=NodeJS-WebSockets"
+
 );
 
 let documentosColecao;
