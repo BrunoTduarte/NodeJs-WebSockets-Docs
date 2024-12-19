@@ -6,7 +6,7 @@ function registrarEventosCadastro(socket, io) {
 
         if (usuario === null){
             const resultado = await cadastrarUsuario(dados);
-        
+
 
         if (resultado.acknowledged) {
             socket.emit("cadastro_sucesso")
