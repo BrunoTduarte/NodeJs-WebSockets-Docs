@@ -3,7 +3,7 @@ import {
   encontrarDocumento,
   excluirDocumento,
 } from "../db/documentosDb.js";
-import { adicionarConexao, obteUsuariosDocumento, removerConexao } from "../utils/conexoesDocumentos.js";
+import { adicionarConexao, encontrarConexao, obteUsuariosDocumento, removerConexao } from "../utils/conexoesDocumentos.js";
 
 function registratEventosDocumento(socket, io) {
   socket.on("selecionar_documento",
@@ -11,15 +11,26 @@ function registratEventosDocumento(socket, io) {
       const documento = await encontrarDocumento(nomeDocumento);
 
       if (documento) {
-        socket.join(nomeDocumento);
 
-        adicionarConexao({ nomeDocumento, nomeUsuario });
+        const conexaoEncontrada = encontrarConexao(nomeDocumento, nomeUsuario);
 
-        const usuariosNoDocumento = obteUsuariosDocumento(nomeDocumento);
+        if (!conexaoEncontrada) {
+          socket.join(nomeDocumento);
 
-        io.to(nomeDocumento).emit("usuarios_no_documento", usuariosNoDocumento)
+          adicionarConexao({ nomeDocumento, nomeUsuario });
+  
+          socket.data = {
+            usuarioEntrou: true,
+          }
 
-        devolverTexto(documento.texto);
+          const usuariosNoDocumento = obteUsuariosDocumento(nomeDocumento);
+  
+          io.to(nomeDocumento).emit("usuarios_no_documento", usuariosNoDocumento)
+  
+          devolverTexto(documento.texto);
+        } else {
+          socket.emit("usuario_ja_no_documento");
+        }
       }
 
       socket.on("texto_editor", async ({ texto, nomeDocumento }) => {
@@ -39,11 +50,13 @@ function registratEventosDocumento(socket, io) {
       });
 
       socket.on("disconnect", () => {
-        removerConexao(nomeDocumento, nomeUsuario)
+        if (socket.data.usuarioEntrou){
+          removerConexao(nomeDocumento, nomeUsuario)
 
-        const usuariosNoDocumento = obteUsuariosDocumento(nomeDocumento);
-
-        io.to(nomeDocumento).emit("usuarios_no_documento", usuariosNoDocumento)
+          const usuariosNoDocumento = obteUsuariosDocumento(nomeDocumento);
+  
+          io.to(nomeDocumento).emit("usuarios_no_documento", usuariosNoDocumento)
+        }
       });
     }
   );

@@ -20,6 +20,12 @@ function selecionarDocumento(dadosEntrada) {
   });
 }
 
+socket.on("usuario_ja_no_documento", () =>{
+  alert("Documento ja aberto em outra aba/navegador");
+  window.location.href = "/cadastro/index.html";
+  return
+})
+
 socket.on("usuarios_no_documento", atualizaInterfaceUsuarios)
 
 function emitirTextoEditor(dados) {
